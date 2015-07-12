@@ -1,6 +1,8 @@
 var express, expressJwt,
-        app, secret, port,
+        app, secret, port, env,
         authentication, texting, apiRoute;
+
+env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 express = require("express");
 expressJwt = require('express-jwt');
