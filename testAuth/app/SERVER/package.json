@@ -1,0 +1,34 @@
+{
+  "name": "barbersApp",
+  "version": "0.0.1",
+  "description": "this is a test app",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexey0511/test-app.git"
+  },
+  "keywords": [
+    "test",
+    "app"
+  ],
+  "author": "alexey0511",
+  "license": "myLicence",
+  "bugs": {
+    "url": "https://github.com/alexey0511/test-app/issues"
+  },
+  "homepage": "https://github.com/alexey0511/test-app",
+  "dependencies": {
+    "express": "~4.13.x",
+    "express-jwt":"~3.0.x",
+    "logfmt": "~1.2.x",
+    "jsonwebtoken":"~5.0.x",
+    "body-parser":"~1.13.x",
+    "clickatell":"~0.0.x",
+    "json":"~9.0.x"
+  },
+  "devDependencies": {}
+}

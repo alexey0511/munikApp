@@ -1,0 +1,53 @@
+
+html, body {
+    margin: 0 5px;
+}
+#newClientForm {
+    padding: 10px;
+    border: 1px solid black;
+}
+#newClientForm form .ng-invalid.ng-dirty {background-color: lightpink;}
+#newClientForm form .ng-valid.ng-dirty {background-color: lightgreen; }
+#newClientForm div.error {color:red; font-weight:bold; margin-left: 100px;}
+/* app css stylesheet */
+#ClientsTableMain tr {
+}
+#ClientsTableMain tr:hover {
+    background-color: lawngreen;
+}
+/*.menu {
+    list-style: none;
+    border-bottom: 0.1em solid black;
+    margin-bottom: 2em;
+    padding: 0 0 0.5em;
+}*/
+
+/*.menu:before {
+    content: "[";
+}
+
+.menu:after {
+    content: "]";
+}
+
+.menu > li {
+    display: inline;
+}
+
+.menu > li:before {
+    content: "|";
+    padding-right: 0.3em;
+}
+
+.menu > li:nth-child(1):before {
+    content: "";
+    padding: 0;
+}*/
+
+
+    .scissors-icon { 
+      height: 38px;
+      width: 38px;
+      background-size: contain;
+      background-image: url("components/img/scissors-full.png");
+    }
