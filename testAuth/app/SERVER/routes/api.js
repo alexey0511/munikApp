@@ -11,7 +11,8 @@ router.route('/me')
         .get(function (req, res) {
             // get user from JWT and give readable value to the user
             res.json({
-                user: req.user.username
+                user: req.user.username,
+                role: req.user.role
             });
         })
 
