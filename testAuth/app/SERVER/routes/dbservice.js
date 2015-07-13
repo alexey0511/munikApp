@@ -8,7 +8,8 @@ router.route('/dbservice')
 //    var username = req.body.user.username;
             var authClient = "abc";
             var authServer = authClient;
-            var dbReady = new db.DbService({DbId: 'FZppyrqd2WJkyAr7bLk0LVGbpD6Mug0L', DbPath: '/api/1/databases/hwhl_dev/collections/'});
+            var appConfig = require('../config.js');
+                var dbReady = new db.DbService({DbId: process.env.NODE_ENV.DbId, DbPath: process.env.NODE_ENV.DbPath});
             var success = function (result) {
                 res.send(result);
             };
