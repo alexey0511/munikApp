@@ -2,9 +2,7 @@
 // Declare app level module which depends on views, and components
 angular.module('myApp', [
     'ngRoute',
-//    'myApp.view1',
-//    'myApp.view2',
-//    'myApp.clients',
+    'myApp.clients',
 //    'myApp.sell',
 //    'myApp.scanClient',
 //    'myApp.visits',
@@ -32,7 +30,7 @@ angular.module('myApp', [
             $scope.setCurrentUser = function (user) {
                 $scope.currentUser = user;
                 $cookieStore.put('userInfo', user);
-
+                Session.create(1, user.user, user.role);
             };
             if ($cookieStore.get('userInfo')) {
                 $scope.setCurrentUser($cookieStore.get('userInfo'));
@@ -42,6 +40,7 @@ angular.module('myApp', [
             $scope.logout = function () {
                 delete $scope.currentUser;
                 $cookieStore.remove('userInfo');
+                Session.destroy();
             };
 
         })
@@ -79,11 +78,9 @@ angular.module('myApp', [
         })
         .constant('USER_ROLES', {
             all: '*',
-            admin: '1',
-            editor: 'editor',
-            guest: 'guest'
+            user: 'user'
         })
-        .factory('AuthService', function ($http, Session, $rootScope, $cookieStore) {
+        .factory('AuthService', function ($http, Session, $cookieStore) {
             var authService = {};
 
             authService.login = function (credentials) {
@@ -99,24 +96,19 @@ angular.module('myApp', [
                             return false;
                         });
             };
-
             authService.isAuthenticated = function () {
                 return !!Session.userId;
             };
-
             authService.isAuthorized = function (authorizedRoles) {
-                if (!angular.isArray(authorizedRoles)) {
+                if (!Array.isArray(authorizedRoles)) {
                     authorizedRoles = [authorizedRoles];
                 }
-
                 return (authService.isAuthenticated() &&
                         authorizedRoles.indexOf(Session.userRole) !== -1);
             };
             authService.logout = function () {
 
             };
-
-            authService.set
 
             return authService;
         })
@@ -149,7 +141,7 @@ angular.module('myApp', [
                     templateUrl: 'pages/2.viewClients/clients.html',
                     controller: 'clientsCtrl',
                     data: {
-                        authorizedRoles: [USER_ROLES.admin]
+                        authorizedRoles: [USER_ROLES.user]
                     },
                     resolve: {
                         auth: function resolveAuthentication(AuthResolver) {
@@ -161,7 +153,7 @@ angular.module('myApp', [
                     templateUrl: 'pages/2.viewClients/client.html',
                     controller: 'clientCtrl',
                     data: {
-                        authorizedRoles: [USER_ROLES.admin]
+                        authorizedRoles: [USER_ROLES.user]
                     },
                     resolve: {
                         auth: function resolveAuthentication(AuthResolver) {
@@ -171,11 +163,10 @@ angular.module('myApp', [
                 });
                 $routeProvider.otherwise({redirectTo: '/login'});
             }])
-        .factory('AuthResolver', function ($q, $rootScope, $location, AUTH_EVENTS) {
+        .factory('AuthResolver', function ($q, $rootScope, $location) {
             return {
                 resolve: function () {
                     var deferred = $q.defer();
-                    console.log($rootScope);
                     var unwatch = $rootScope.$watch('$$childHead.currentUser', function (currentUser) {
                         if (angular.isDefined(currentUser) && currentUser) {
                             deferred.resolve(currentUser);
@@ -361,8 +352,8 @@ angular.module('myApp', [
             };
             return DbActionsService;
         })
-        .run(['$rootScope', '$location', '$cookieStore', 'AUTH_EVENTS', 'AuthService',
-            function ($rootScope, $location, $cookieStore, AUTH_EVENTS, AuthService) {
+        .run(['$rootScope', 'AUTH_EVENTS', 'AuthService',
+            function ($rootScope, AUTH_EVENTS, AuthService) {
                 // keep user logged in after page refresh
                 $rootScope.$on(AUTH_EVENTS.loginFailed, function () {
                     console.log("App Run rootscope: login failed");
