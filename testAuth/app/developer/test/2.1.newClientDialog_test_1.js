@@ -17,6 +17,7 @@ describe("Directive: newClient", function () {
         var visit = {userId: 234, userName: "sss", price: "35.00", new : true, date: '', user: '', client: ''};
         $scope.currentUser = '';
         $scope.people = [];
+        
     }));
 
     it("sends requests", function () {
