@@ -1,12 +1,13 @@
-var express = require('express');
-var router = express.Router();
-var bodyParser = require('body-parser');
-var expressJwt = require('express-jwt');
-var jwt = require('jsonwebtoken');
-var bodyParserJson = bodyParser.json();
+var express, router, bodyParser, expressJwt, jwt, bodyParserJson,
+        db;
+
+express = require('express');
+router = express.Router();
+bodyParser = require('body-parser');
+expressJwt = require('express-jwt');
+jwt = require('jsonwebtoken');
+bodyParserJson = bodyParser.json();
 db = require('../dbService');
-
-
 
 
 router.route('/me')
@@ -23,6 +24,22 @@ router.route('/getClients')
             db.getAll("clients", function (result) {
                 res.json(result);
             });
+        });
+router.route('/clients')
+        .post(bodyParserJson, function (req, res) {
+            // get user from JWT and give readable value to the user
+            var success = function (data) {
+                data ? res.send(data) : res.status(400).send({message: "Failed to create a record"});
+            };
+            db.create("clients", req.body, success);
+        });
+router.route('/visits')
+        .post(bodyParserJson, function (req, res) {
+            // get user from JWT and give readable value to the user
+            var success = function (data) {
+                data ? res.send(data) : res.status(400).send({message: "Failed to create a record"});
+            };
+            db.create("/haircuts", req.body, success);
         });
 
 

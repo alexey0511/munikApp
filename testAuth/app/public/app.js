@@ -6,7 +6,7 @@ angular.module('myApp', [
 //    'myApp.sell',
 //    'myApp.scanClient',
 //    'myApp.visits',
-//    'myApp.newclient',
+    'myApp.newclient',
 //    'myApp.manageProducts',
 //    'myApp.manageUsers',
 //    'myApp.generateQR',
@@ -18,11 +18,17 @@ angular.module('myApp', [
 //    'myApp.version', - TEMPORARY UNLOCK AFTER
     'myApp.Authentication'
 ])
-        .controller('ApplicationController', function ($scope, Session, USER_ROLES, AuthService, $rootScope, $cookieStore, $location) {
+        .controller('ApplicationController', function ($scope, AUTH_EVENTS, Session, USER_ROLES, AuthService, $rootScope, $cookieStore, $location) {
+            $scope.$on(AUTH_EVENTS.notAuthenticated, function () {
+                $scope.currentUser = null;
+            });
             if ($location.path() !== '/login') {
                 $scope.isLoginPage = false;
             } else {
                 $scope.isLoginPage = true;
+            }
+            $scope.findClient = function () {
+                console.log($scope.people);
             }
             $scope.currentUser = null;
             $scope.userRoles = USER_ROLES;
@@ -42,9 +48,8 @@ angular.module('myApp', [
                 $cookieStore.remove('userInfo');
                 Session.destroy();
             };
-
         })
-        .factory('authInterceptor', function ($rootScope, $q, $cookieStore, AUTH_EVENTS) {
+        .factory('authInterceptor', function ($rootScope, $q, $cookieStore, AUTH_EVENTS, Session) {
             return {
                 request: function (config) {
                     config.headers = config.headers || {};
@@ -63,6 +68,7 @@ angular.module('myApp', [
                     return $q.reject(response);
                     if (response.status === 401) {
                         // handle the case where the user is not authenticated
+
                     }
                     return response || $q.when(response);
                 }
@@ -82,7 +88,6 @@ angular.module('myApp', [
         })
         .factory('AuthService', function ($http, Session, $cookieStore) {
             var authService = {};
-
             authService.login = function (credentials) {
                 return $http
                         .post('/authenticate', credentials)
@@ -109,7 +114,6 @@ angular.module('myApp', [
             authService.logout = function () {
 
             };
-
             return authService;
         })
         .service('Session', function () {
@@ -139,7 +143,7 @@ angular.module('myApp', [
                 });
                 $routeProvider.when('/clients', {
                     templateUrl: 'pages/2.viewClients/clients.html',
-                    controller: 'clientsCtrl',
+                    controller: 'ClientsController',
                     data: {
                         authorizedRoles: [USER_ROLES.user]
                     },
@@ -161,8 +165,21 @@ angular.module('myApp', [
                         }
                     }
                 });
-                $routeProvider.otherwise({redirectTo: '/login'});
+                $routeProvider.otherwise({redirectTo: '/clients'});
             }])
+        .service('commonFunctions', function () {
+            return {
+                generateGuid: function guid() {
+                    function s4() {
+                        return Math.floor((1 + Math.random()) * 0x10000)
+                                .toString(16)
+                                .substring(1);
+                    }
+                    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                            s4() + '-' + s4() + s4() + s4();
+                }
+            };
+        })
         .factory('AuthResolver', function ($q, $rootScope, $location) {
             return {
                 resolve: function () {
@@ -358,7 +375,6 @@ angular.module('myApp', [
                 $rootScope.$on(AUTH_EVENTS.loginFailed, function () {
                     console.log("App Run rootscope: login failed");
                 });
-
                 $rootScope.$on('$routeChangeStart', function (event, next) {
                     // redirect to login page if not logged in
                     if (next.data && next.data.authorizedRoles) {
@@ -388,6 +404,19 @@ angular.module('myApp', [
                     scope.visible = false;
                     scope.$on(AUTH_EVENTS.notAuthenticated, showDialog);
                     scope.$on(AUTH_EVENTS.sessionTimeout, showDialog);
+                }
+            };
+        })
+        .directive('newClientDialog', function (AUTH_EVENTS) {
+            return {
+                restrict: 'A',
+                template: '<div ng-include="\'/pages/3.viewNewClient/newClientDialog.html\'"></div>',
+                controller: 'NewClientController',
+                link: function (scope) {
+                    var showDialog = function () {
+                        scope.visible = true;
+                    };
+                    scope.visible = false;
                 }
             };
         })

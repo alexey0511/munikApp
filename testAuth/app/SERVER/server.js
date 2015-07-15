@@ -30,6 +30,11 @@ app.use('/texting', texting);
 
 apiRoute = require('./routes/api');
 app.use('/api', expressJwt({secret: secret}));
+app.use(function (err, req, res, next) {
+    if (err.name === 'UnauthorizedError') {
+        res.send(401, {error: 'invalid token...'});
+    }
+});
 app.use('/api', apiRoute);
 
 port = Number(process.env.PORT || 5001);

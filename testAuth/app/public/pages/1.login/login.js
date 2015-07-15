@@ -2,9 +2,6 @@
 
 angular.module('myApp.Authentication', [])
         .controller('LoginController', function ($scope, $http, $rootScope, AUTH_EVENTS, AuthService, $location) {
-//            $scope.$on(AUTH_EVENTS.loginSuccess, function () {
-//                $location.path('/clients');
-//            });
             $scope.credentials = {
                 username: '',
                 password: ''
