@@ -41,7 +41,16 @@ router.route('/visits')
             };
             db.create("/haircuts", req.body, success);
         });
-
+router.route('/visits/:id')
+        .get(function (req, res) {
+            // get user from JWT and give readable value to the user
+                console.log(req.param("id"));
+            var success = function (data) {
+                console.log(data);
+                data ? res.send(data) : res.status(400).send({message: "Failed retrieve record"});
+            };
+            db.findRecord("/haircuts", '{"userId": ' + req.param("id") + '}', success);
+        });
 
 module.exports = router;
 
