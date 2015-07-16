@@ -5,7 +5,7 @@ angular.module('myApp.newclient', ['ngRoute'])
         .config(['$routeProvider', function ($routeProvider) {
                 $routeProvider.when('/newclient', {
                     templateUrl: 'pages/3.viewNewClient/newclient.html',
-                    controller: 'newclientCtrl'
+                    controller: 'NewClientController'
                 });
             }])
         .controller('NewClientController', function ($scope, $location, commonFunctions, $http) {
@@ -17,8 +17,6 @@ angular.module('myApp.newclient', ['ngRoute'])
                 last_name:''    
             };
             $scope.newClient = angular.copy($scope.newClientMaster);
-            
-
             $scope.addNewClient = function () {
                 $scope.newClient.id = commonFunctions.generateGuid();
                 $scope.newClient.name = $scope.newClient.first_name + " " + $scope.newClient.last_name;
@@ -53,5 +51,4 @@ angular.module('myApp.newclient', ['ngRoute'])
             $scope.resetNewClientForm = function () {
                 $scope.newClient = angular.copy($scope.newClientMaster);
             };
-
         });

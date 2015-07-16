@@ -5,7 +5,7 @@
         <div class="form-group">
             <label for="inputFirstName" class="col-sm-6 control-label">First Name</label>
             <div class="col-sm-6">
-                <input name="first_name" class="form-control" id="inputFirstName" placeholder="First name" ng-model="newClient.first_name" required>
+                <input capitalize-first name="first_name" class="form-control" id="inputFirstName" placeholder="First name" ng-model="newClient.first_name" required>
             </div>
             <div class="error" ng-show="newClientForm.first_name.$error.required && newClientForm.first_name.$dirty">
                 <span>Please enter a value</span>
@@ -15,7 +15,7 @@
         <div class="form-group">
             <label for="inputLastName" class="col-sm-6 control-label">Last Name</label>
             <div class="col-sm-6">
-                <input class="form-control" id="inputLastName" placeholder="Last name" ng-model="newClient.last_name">
+                <input capitalize-first class="form-control" id="inputLastName" placeholder="Last name" ng-model="newClient.last_name">
             </div>
         </div>
         <div class="form-group">
@@ -40,9 +40,11 @@
             </div>
         </div>
         <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
+            <div class="col-xs-offset-6 col-xs-6">
                 <button type="submit" class="btn btn-primary">
-                    <i class="glyphicon glyphicon-plus-sign" ></i>Add</button>
+                    <i class="glyphicon glyphicon-plus-sign" ></i> Add</button>
+                <button ng-click="resetNewClientForm();newClientForm.$setPristine() " class="btn btn-danger">
+                   Reset</button>
             </div>
         </div>
     </form>

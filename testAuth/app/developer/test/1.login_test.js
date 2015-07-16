@@ -8,8 +8,8 @@
 
 describe('Controller: LoginController', function () {
 
-    var $controller,$httpBackend, $rootScope, $location, $cookieStore, mockScope,
-    ApplicationController, LoginController, mockSession;
+    var $controller, $httpBackend, $rootScope, $location, $cookieStore, mockScope,
+            ApplicationController, LoginController, mockSession;
     beforeEach(module('myApp'),
             module('myApp.Authentication'));
 
@@ -50,35 +50,29 @@ describe('Controller: LoginController', function () {
         // test user
         mockScope.credentials.username = 'munik';
         mockScope.credentials.password = 'groom';
-        
+
         // setup backend response
         $httpBackend.expectPOST('/authenticate', mockScope.credentials)
                 .respond(200, {
-                        token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.W10.SiKDGW5tNdC7aSYe1YLCPhAOyB-JrY1tjEVdViF3wZI',
-                        username: mockScope.credentials.username,
-                        role: 'guest', sessionId: "12345"});
-        $httpBackend.expectGET('/api/me', function(headers) {
-   return headers['Authorization'];
+                    token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.W10.SiKDGW5tNdC7aSYe1YLCPhAOyB-JrY1tjEVdViF3wZI',
+                    username: mockScope.credentials.username,
+                    role: 'guest', sessionId: "12345"});
+        $httpBackend.expectGET('/api/me', function (headers) {
+            return headers['Authorization'];
         })
                 .respond(200, {
-                        user: mockScope.credentials.username,
-                        role: '1'});
+                    user: mockScope.credentials.username,
+                    role: '1'});
 
         // DO ACTION - LOGIN
         mockScope.login(mockScope.credentials);
         $httpBackend.flush();
         $rootScope.$digest();
- //         CHECK RESULT
+        //         CHECK RESULT
         expect(mockScope.currentUser.user).toBe('munik');
         expect(mockScope.currentUser.role).toBe('1');
 //        // redirect
         expect($location.path()).toBe('/clients');
-mockScope.currentUser = null;
-    });
-
-    it('should restrict access', function () {
-//        mockScope.currentUser = { username:'munik', role:'guest'}
-        $location.path('/clients');
-//        expect(mockSession).toEqual('munik');
+        mockScope.currentUser = null;
     });
 });

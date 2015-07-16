@@ -3,7 +3,7 @@
 angular.module('myApp', [
     'ngRoute',
     'myApp.clients',
-//    'myApp.sell',
+    'myApp.sell',
 //    'myApp.scanClient',
 //    'myApp.visits',
     'myApp.newclient',
@@ -27,8 +27,21 @@ angular.module('myApp', [
             } else {
                 $scope.isLoginPage = true;
             }
-            $scope.findClient = function () {
-                console.log($scope.people);
+            $scope.findClient = function (id) {
+                for (var i = 0, listLength = $scope.people.length; i < listLength; i++) {
+                    if (typeof $scope.people[i].id === 'undefined') {
+                      $scope.people[i].id = $scope.people[i]._id;  
+                    };
+                    
+                    if ($scope.people[i].id.toString() === id) {
+                        return $scope.people[i];
+                    }
+                }
+                return null;
+            }
+            $scope.people = [];
+            $scope.setPeopleList = function (people) {
+                $scope.people = people;
             }
             $scope.currentUser = null;
             $scope.userRoles = USER_ROLES;
@@ -47,6 +60,27 @@ angular.module('myApp', [
                 delete $scope.currentUser;
                 $cookieStore.remove('userInfo');
                 Session.destroy();
+            };
+        })
+        .directive('capitalizeFirst', function ($parse) {
+            return {
+                require: 'ngModel',
+                link: function (scope, element, attrs, modelCtrl) {
+                    var capitalize = function (inputValue) {
+                        if (inputValue === undefined) {
+                            inputValue = '';
+                        }
+                        var capitalized = inputValue.charAt(0).toUpperCase() +
+                                inputValue.substring(1);
+                        if (capitalized !== inputValue) {
+                            modelCtrl.$setViewValue(capitalized);
+                            modelCtrl.$render();
+                        }
+                        return capitalized;
+                    }
+                    modelCtrl.$parsers.push(capitalize);
+                    capitalize($parse(attrs.ngModel)(scope)); // capitalize initial value
+                }
             };
         })
         .factory('authInterceptor', function ($rootScope, $q, $cookieStore, AUTH_EVENTS, Session) {
@@ -155,7 +189,7 @@ angular.module('myApp', [
                 });
                 $routeProvider.when('/clients/:id', {
                     templateUrl: 'pages/2.viewClients/client.html',
-                    controller: 'clientCtrl',
+                    controller: 'SingleClientController',
                     data: {
                         authorizedRoles: [USER_ROLES.user]
                     },
@@ -401,9 +435,14 @@ angular.module('myApp', [
                     var showDialog = function () {
                         scope.visible = true;
                     };
+                    var hideDialog = function () {
+                        scope.visible = false;
+                    }
                     scope.visible = false;
                     scope.$on(AUTH_EVENTS.notAuthenticated, showDialog);
                     scope.$on(AUTH_EVENTS.sessionTimeout, showDialog);
+
+                    scope.$on(AUTH_EVENTS.loginSuccess, hideDialog);
                 }
             };
         })

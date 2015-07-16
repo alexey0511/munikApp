@@ -25,6 +25,24 @@ router.route('/getClients')
                 res.json(result);
             });
         });
+router.route('/getProducts')
+        .get(function (req, res) {
+            // get user from JWT and give readable value to the user
+            db.getAll("products", function (result) {
+                res.json(result);
+            });
+        });
+router.route('/getUsers')
+        .get(function (req, res) {
+            // get user from JWT and give readable value to the user
+            db.getAll("users", function (result) {
+                                var users = [];
+                for (var i=0, l=result.length;i<l;i++) {
+                    users.push(result[i].username);
+                }
+                res.json(users);
+            });
+        });
 router.route('/clients')
         .post(bodyParserJson, function (req, res) {
             // get user from JWT and give readable value to the user
@@ -44,12 +62,25 @@ router.route('/visits')
 router.route('/visits/:id')
         .get(function (req, res) {
             // get user from JWT and give readable value to the user
-                console.log(req.param("id"));
             var success = function (data) {
-                console.log(data);
                 data ? res.send(data) : res.status(400).send({message: "Failed retrieve record"});
             };
             db.findRecord("/haircuts", '{"userId": ' + req.param("id") + '}', success);
+        });
+        
+        // potentially replace with update
+router.route('/clients/:id')
+        .post(bodyParserJson,function (req, res) {
+            if (req.param("id") === req.body.id.toString()) {
+            console.log("YES");
+            // get user from JWT and give readable value to the user
+            var success = function (data) {
+                data ? res.send(data) : res.status(400).send({message: "Failed retrieve record"});
+            };
+            db.create("/clients", req.body, success);
+        } else {
+            console.log("NO",typeof req.param("id"),typeof req.body.id );
+        }
         });
 
 module.exports = router;

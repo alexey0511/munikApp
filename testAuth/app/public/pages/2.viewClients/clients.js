@@ -5,47 +5,50 @@ angular.module('myApp.clients', ['ngRoute'])
             winMessage: "HALF PRICE HAIR CUT",
             defaultPrice: "35"
         })
-        .controller('clientCtrl', function ($scope, $rootScope, DbActionsService, $location, $routeParams, $http) {
+        .controller('SingleClientController', function ($scope, $q, $location, $routeParams, $http) {
             $scope.qrClient = "";
-
-            DbActionsService.getAll("clients")
-                    .success(function (response) {
-                        $rootScope.people = response;
-                        var i = 0;
-                        $rootScope.people.forEach(function (person) {
-                            if (person.id == $routeParams.id) {
-                                $scope.client = $rootScope.people[i];
-                                $scope.qrClient = $scope.client.qrcode.toString();
-                                return;
-                            }
-                            i++;
-                        }
-                        );
-                        $scope.client.last_visit = convertDate($scope.client.last_visit);
-                        $scope.client.createdOn = convertDate($scope.client.createdOn);
-                        DbActionsService.getRecord("haircuts", '{"userId": ' + $scope.client.id + '}')
-                                .success(function (response) {
-                                    $scope.VisitsArray = response;
-                                });
-                    });
-            var convertDate = function (date) {
-                var year = new Date(date).getFullYear();
-                var month = new Date(date).getMonth() + 1;
-                var day = new Date(date).getDate();
-                if (month < 10) {
-                    month = "0" + month;
+            $scope.checkClientsList = function () {
+                var defer = $q.defer();
+                if (Array.isArray($scope.people) && $scope.people.length > 0) {
+                    defer.resolve();
+                } else {
+                    $http.get('/api/getClients')
+                            .success(function (response) {
+                                $scope.setPeopleList(response);
+                                defer.resolve();
+                            })
+                            .error(function () {
+                                alert("can't connect to database")
+                                defer.reject();
+                            });
                 }
-                if (day < 10) {
-                    day = "0" + day;
+                return defer.promise;
+            };
+            $scope.getClient = function () {
+                $scope.client = $scope.findClient($routeParams.id);
+                if ($scope.client) {
+                    $scope.client.createdOn = new Date($scope.client.createdOn);
+                    $scope.client.last_visit = new Date($scope.client.last_visit);
+                    $scope.client.counters.visits = Number($scope.client.counters.visits);
+                    $scope.client.counters.progress = Number($scope.client.counters.progress);
+                    $scope.client.counters.freeVisits = Number($scope.client.counters.freeVisits);
+                    $http.get('/api/visits/' + $scope.client.id)
+                            .success(function (response) {
+                                $scope.VisitsArray = response;
+                            });
+                } else {
+                    alert("Client not found");
                 }
-
-                var new_date;
-                new_date = year + "-" + month + "-" + day;
-                return new_date;
-            }
-
+            };
+            $scope.checkClientsList().then(function () {
+                $scope.getClient();
+            }, function () {
+                alert("Client not found");
+            });
+            // TODO -> find why I used qr client
+//                    $scope.qrClient = $scope.client.qrcode.toString();
             $scope.updateClient = function () {
-                DbActionsService.create('clients', $scope.client)
+                $http.post('/api/clients/' + $scope.client.id, $scope.client)
                         .success(function (r) {
                             $location.path("/clients");
                         });
@@ -54,11 +57,10 @@ angular.module('myApp.clients', ['ngRoute'])
         .controller('ClientsController', function ($scope, AUTH_EVENTS, $rootScope, $http, clientsService, $location, DEFAULT_SETTINGS) {
 
             $scope.isLoginPage = false;
-            $scope.people = [];
 
             $http.get('/api/getClients')
                     .success(function (response) {
-                        $scope.people = response;
+                        $scope.setPeopleList(response);
                     });
 // BOF PAGINATION 
             $scope.currentPage = 0;

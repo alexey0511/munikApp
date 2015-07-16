@@ -9,15 +9,15 @@
         <title>My AngularJS App</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="components/html5-boilerplate/css/normalize.css">
-        <link rel="stylesheet" href="components/html5-boilerplate/css/main.css">
+        <link rel="stylesheet" href="components/html5-boilerplate/dist/css/normalize.css">
+        <link rel="stylesheet" href="components/html5-boilerplate/dist/css/main.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <link rel="stylesheet" href="components/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="components/bootstrap/css/bootstrap-theme.min.css">
         <script src="components/bootstrap/js/bootstrap.min.js"></script>
 
         <link rel="stylesheet" href="css/app.css">
-        <script src="components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
+        <script src="components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
     </head>
     <body ng-controller="ApplicationController">
         <nav class="navbar navbar-default">
@@ -30,25 +30,31 @@
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
                         <li ng-if="currentUser.role === 'user'"><a href="#/clients">Clients</a></li>
-                        <li ng-if="currentUser.role === 'user'"><a href="#/sell">Sell</a></li>
-                        <li ng-if="currentUser.role === 'user'"><a href="#/message">Txt messaging</a></li>
-                        <li ng-if="currentUser.role === 'user'"><a href="#/scanClient">Scan Client</a></li>
+                        <li ng-if="currentUser.role === 'user'"><a href="#/sell">Buy haircut</a></li>
+                        <li ng-if="currentUser.role === 'user'"><a href="#/scanClient">Scan QR Code</a></li>
                         <li ng-if="currentUser.role === 'user'"><a href="#/newclient">New Client</a></li>
-                        <li class="dropdown" ng-if="currentUser.role === 1">
+                        <li class="dropdown" ng-if="currentUser.role === 'user'">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reports<span class="caret"></span></a>
                             <ul class="dropdown-menu" >
-                                <li ng-if="currentUser.role === 1"><a href="#/report">Report</a></li>
-                        <li ng-if="currentUser.role === 1"><a href="#/visits">Visits</a></li>
+                                <li ng-if="currentUser.role === 'user'"><a href="#/report">Report</a></li>
+                                <li ng-if="currentUser.role === 'user'"><a href="#/visits">Visits</a></li>
                             </ul>
                         </li>
-                        <li class="dropdown" ng-if="currentUser.role === 1">
+                        <li class="dropdown" ng-if="currentUser.role === 'user'">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin<span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li ng-if="currentUser.role === 1"><a href="#/manageproducts">Manage Products</a></li>
-                                <li ng-if="currentUser.role === 1"><a href="#/manageusers">Manage Users</a></li>
-                                <li ng-if="currentUser.role == 1"><a href="#/manage">Manage Clients</a></li>
+                                <li ng-if="currentUser.role === 'user'"><a href="#/manageproducts">Manage Products</a></li>
+                                <li ng-if="currentUser.role === 'user'"><a href="#/manageusers">Manage Users</a></li>
+                                <li ng-if="currentUser.role == 'user'"><a href="#/manage">Manage Clients</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li ng-if="currentUser.role === 1"><a href="#/generateQR">Generate QR</a></li>
+                                <li ng-if="currentUser.role === 'user'"><a href="#/generateQR">Generate QR</a></li>
+                                <li ng-if="currentUser.role === 'user'"><a href="#/settings">Settings</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown" ng-if="currentUser.role === 'user'">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Secret<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li ng-if="currentUser.role === 'user'"><a href="#/message">Txt messaging</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -87,6 +93,7 @@
         <script src="pages/1.login/login.js"></script>
         <script src="pages/2.viewClients/clients.js"></script>
         <script src="pages/3.viewNewClient/newClient.js"></script>
+        <script src="pages/4.viewSell/sell.js"></script>
 
         <script src="components/version/version-directive.js"></script>
         <script src="components/version/interpolate-filter.js"></script>
