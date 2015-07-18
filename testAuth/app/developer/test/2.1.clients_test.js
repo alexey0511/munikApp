@@ -9,7 +9,7 @@
 
 describe('Controller: ClientsController', function () {
 
-    var $controller, $httpBackend, $rootScope, scope,
+    var $controller, $httpBackend, $rootScope, scope,clientsService,
             ApplicationController, ClientsController;
     beforeEach(module('myApp'), module('myApp.clients'));
     var DEFAULT_SETTINGS;
@@ -17,6 +17,7 @@ describe('Controller: ClientsController', function () {
         $httpBackend = $injector.get('$httpBackend');
         $rootScope = $injector.get('$rootScope');
         $controller = $injector.get('$controller');
+        clientsService = $injector.get('clientsService')
         DEFAULT_SETTINGS = $injector.get('DEFAULT_SETTINGS');
 
         scope = $rootScope.$new();
@@ -58,13 +59,13 @@ describe('Controller: ClientsController', function () {
             defaultPrice: "35"
         };
         var id = 2;
-        expect(scope.findClientIndex(id)).toBe(1);
+        expect(clientsService.findClientIndex(id, scope.people)).toBe(1);
         $httpBackend.expectPOST('/api/visits').respond(200, {result: "all GOOD"});
         $httpBackend.expectPOST('/api/clients').respond(200, {result: "all GOOD"});
         scope.addHairCut(id);
-        expect(scope.people[scope.findClientIndex(id)].counters.progress).toBe(1);
-        expect(scope.people[scope.findClientIndex(id)].counters.visits).toBe(1);
-        expect(scope.people[scope.findClientIndex(id)].counters.freeVisits).toBe(0);
+        expect(scope.people[clientsService.findClientIndex(id, scope.people)].counters.progress).toBe(1);
+        expect(scope.people[clientsService.findClientIndex(id, scope.people)].counters.visits).toBe(1);
+        expect(scope.people[clientsService.findClientIndex(id, scope.people)].counters.freeVisits).toBe(0);
 
         $httpBackend.flush();
         $httpBackend.verifyNoOutstandingRequest();

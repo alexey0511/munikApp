@@ -4,21 +4,22 @@ angular.module('myApp', [
     'ngRoute',
     'myApp.clients',
     'myApp.sell',
-//    'myApp.scanClient',
-//    'myApp.visits',
+    'myApp.scanClient',
+    'myApp.visits',
     'myApp.newclient',
-//    'myApp.manageProducts',
-//    'myApp.manageUsers',
-//    'myApp.generateQR',
+   'myApp.manageProducts',
+    'myApp.manageUsers',
+    ,'myApp.manageClients',
+    'myApp.generateQR',
     'ngCookies',
-//    'myApp.report',
-//    'ui.bootstrap',
-//    'ja.qr',  - TEMPORARY UNLOCK AFTER
-//    'myApp.login',
-//    'myApp.version', - TEMPORARY UNLOCK AFTER
-    'myApp.Authentication'
+    'myApp.report',
+    'ui.bootstrap',
+    'ja.qr',
+    'myApp.version',
+    'myApp.Authentication',
+    'myApp.txting'
 ])
-        .controller('ApplicationController', function ($scope, AUTH_EVENTS, Session, USER_ROLES, AuthService, $rootScope, $cookieStore, $location) {
+        .controller('ApplicationController', function ($scope, AUTH_EVENTS, DEFAULT_SETTINGS, clientsService, $http, $q, Session, USER_ROLES, AuthService, $rootScope, $cookieStore, $location) {
             $scope.$on(AUTH_EVENTS.notAuthenticated, function () {
                 $scope.currentUser = null;
             });
@@ -30,9 +31,9 @@ angular.module('myApp', [
             $scope.findClient = function (id) {
                 for (var i = 0, listLength = $scope.people.length; i < listLength; i++) {
                     if (typeof $scope.people[i].id === 'undefined') {
-                      $scope.people[i].id = $scope.people[i]._id;  
-                    };
-                    
+                        $scope.people[i].id = $scope.people[i]._id;
+                    }
+                    ;
                     if ($scope.people[i].id.toString() === id) {
                         return $scope.people[i];
                     }
@@ -60,6 +61,104 @@ angular.module('myApp', [
                 delete $scope.currentUser;
                 $cookieStore.remove('userInfo');
                 Session.destroy();
+            };
+            $scope.checkClients = function () {
+                var defer = $q.defer();
+                if (Array.isArray($scope.people && $scope.people.length > 0)) {
+                    defer.resolve();
+                } else {
+                    $http.get('/api/getClients')
+                            .success(function (response) {
+                                $scope.setPeopleList(response);
+                                defer.resolve();
+                            })
+                            .error(function () {
+                                alert("can't connect to database")
+                                defer.reject();
+                            });
+                }
+                return defer.promise;
+            };
+            $scope.checkUsers = function () {
+                var defer = $q.defer();
+                if (Array.isArray($scope.users && $scope.users.length > 0)) {
+                    defer.resolve();
+                } else {
+                    $http.get('/api/getUserList')
+                            .success(function (response) {
+                                $scope.users = response;
+                                defer.resolve();
+                            })
+                            .error(function () {
+                                defer.reject();
+                            });
+                }
+                return defer.promise;
+            };
+            $scope.recordVisit = function (visit) {
+                console.log(">>", visit);
+                var clientIndex = clientsService.findClientIndex(visit.client.id, $scope.people);
+                $scope.increaseCount(clientIndex);
+                $http.post('/api/visits', visit)
+                        .success(function () {
+                            $http.post('/api/clients', $scope.people[clientIndex]);
+                        });
+            };
+            $scope.increaseCount = function (clientIndex) {
+//                $scope.verifyCountersNum(clientIndex);
+                if (Array.isArray($scope.people) && typeof ($scope.people[clientIndex]) !== 'undefined'
+                        && typeof ($scope.people[clientIndex].counters) !== 'undefined') {
+                    $scope.people[clientIndex].counters.progress += 1;
+                    $scope.people[clientIndex].counters.visits += 1;
+                    $scope.people[clientIndex].last_visit = new Date();
+                    if ($scope.people[clientIndex].counters.progress === DEFAULT_SETTINGS.numberVisits) {
+                        $scope.people[clientIndex].counters.freeVisits += 1;
+                        // Invoking immediatelly for now. ToDo: implement invoke on button click;
+                        $scope.redeemCoupon(clientIndex);
+                    }
+                } else {
+                    console.log("Error while adding...");
+                }
+            };
+            $scope.redeemCoupon = function (clientIndex) {
+                if ($scope.people[clientIndex].counters.freeVisits > 0) {
+                    $scope.people[clientIndex].counters.progress = 0;
+                    $scope.people[clientIndex].counters.freeVisits -= 1;
+                    alert(DEFAULT_SETTINGS.winMessage);
+                } else {
+                    alert("You don't have any discount coupons yet");
+                }
+            };
+            $scope.verifyCountersNum = function (clientIndex) {
+                if (!Number($scope.people[clientIndex].counters.progress) || $scope.people[clientIndex].counters.progress === 'NaN')
+                {
+                    parseInt($scope.people[clientIndex].counters.progress);
+                }
+                if (!Number($scope.people[clientIndex].counters.visits) || $scope.people[clientIndex].counters.visits === 'NaN')
+                {
+                    parseInt($scope.people[clientIndex].counters.visits);
+                }
+                if (!Number($scope.people[clientIndex].counters.freeVisits) || $scope.people[clientIndex].counters.freeVisits === 'NaN')
+                {
+                    parseInt($scope.people[clientIndex].counters.freeVisits);
+                }
+            }
+            $scope.checkProducts = function () {
+                var defer = $q.defer();
+                if (Array.isArray($scope.products && $scope.products.length > 0)) {
+                    defer.resolve();
+                } else {
+                    $http.get('/api/getProducts')
+                            .success(function (response) {
+                                $scope.products = response;
+                                defer.resolve();
+                            })
+                            .error(function () {
+                                alert("can't connect to database")
+                                defer.reject();
+                            });
+                }
+                return defer.promise;
             };
         })
         .directive('capitalizeFirst', function ($parse) {
@@ -108,6 +207,13 @@ angular.module('myApp', [
                 }
             };
         })
+        .constant("DEFAULT_SETTINGS", {
+            numberVisits: 6,
+            winMessage: "HALF PRICE HAIR CUT",
+            defaultPrice: "35",
+            storeId: '123',
+            productExpiration: '0'
+        })
         .constant('AUTH_EVENTS', {
             loginSuccess: 'auth-login-success',
             loginFailed: 'auth-login-failed',
@@ -150,6 +256,7 @@ angular.module('myApp', [
             };
             return authService;
         })
+
         .service('Session', function () {
             this.create = function (sessionId, userId, userRole) {
                 this.id = sessionId;
@@ -243,35 +350,23 @@ angular.module('myApp', [
             MsgSvcApiId: '3513880'
         }
         )
-        .factory('clientsService', function clientsService($rootScope, $http, appConfig) {
+        .factory('clientsService', function clientsService($http) {
             return {
-                findClientByQrCode: function (qrcode) {
-                    var ids = [];
-                    for (var i = 0; i < $rootScope.people.length; i++) {
-                        if (qrcode == $rootScope.people[i].qrcode) {
-                            ids.push(i);
+                findClientByQrCode: function (qrcode, scope) {
+                    for (var i = 0, l = scope.people.length; i < l; i++) {
+                        if (qrcode === scope.people[i].qrcode) {
+                            return scope.people[i];
                         }
                     }
-                    if (ids.length == 1) {
-                        return ids[0];
-                    } else {
-                        return 'no qr code find';
-                    }
-                    ;
+                    return false;
                 },
-                findClientIndex: function (id) {
-                    var ids = [];
-                    for (var i = 0; i < $rootScope.people.length; i++) {
-                        if (id == $rootScope.people[i]._id) {
-                            ids.push(i);
+                findClientIndex: function (id, people) {
+                    for (var i = 0, l = people.length; i < l; i++) {
+                        if (id === people[i].id) {
+                            return i;
                         }
                     }
-                    if (ids.length == 1) {
-                        return ids[0];
-                    } else {
-                        return 'false';
-                    }
-                    ;
+                    return 'false';
                 },
                 saveClients: function () {
                     var url = '/dbservice';
@@ -441,7 +536,6 @@ angular.module('myApp', [
                     scope.visible = false;
                     scope.$on(AUTH_EVENTS.notAuthenticated, showDialog);
                     scope.$on(AUTH_EVENTS.sessionTimeout, showDialog);
-
                     scope.$on(AUTH_EVENTS.loginSuccess, hideDialog);
                 }
             };

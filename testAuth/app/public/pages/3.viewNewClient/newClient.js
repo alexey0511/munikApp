@@ -8,44 +8,41 @@ angular.module('myApp.newclient', ['ngRoute'])
                     controller: 'NewClientController'
                 });
             }])
-        .controller('NewClientController', function ($scope, $location, commonFunctions, $http) {
+        .controller('NewClientController', function ($scope, $location, commonFunctions, $http, DEFAULT_SETTINGS) {
 
             $scope.patterns = {};
             $scope.patterns.phone = new RegExp('^(64)');
             $scope.newClientMaster = {
-                first_name:'',
-                last_name:''    
+                first_name: '',
+                last_name: ''
             };
             $scope.newClient = angular.copy($scope.newClientMaster);
             $scope.addNewClient = function () {
                 $scope.newClient.id = commonFunctions.generateGuid();
                 $scope.newClient.name = $scope.newClient.first_name + " " + $scope.newClient.last_name;
                 $scope.newClient.counters = {
-                    "progress": 1,
-                    "visits": 1,
+                    "progress": 0,
+                    "visits": 0,
                     "freeVisits": 0
                 };
                 $scope.newClient.last_visit = new Date();
                 $scope.newClient.createdOn = new Date();
                 // save to DB
+                console.log("NEW", $scope.newClient);
+                var visit = {
+                    barber: $scope.currentUser.user,
+                    client: $scope.newClient,
+                    price: DEFAULT_SETTINGS.defaultPrice,
+                    date: new Date(),
+                    new : true
+                };
                 $http.post("/api/clients", $scope.newClient)
                         .success(function (clientRecord) {
                             $scope.people.push(clientRecord);
-                        });
-                var visit = {};
-                visit = {
-                    userId: $scope.newClient.id,
-                    userName: $scope.newClient.name,
-                    price: "35.00",
-                    new : true,
-                    date: new Date(),
-                    user: $scope.currentUser.user,
-                    client: $scope.newClient
-                };
-                $http.post("/api/visits", visit)
-                        .success(function (data) {
+                            $scope.recordVisit(visit);
                             $scope.resetNewClientForm();
-                    alert("Thank you for visiting Groom Barbers")
+                            alert("Thank you for visiting Groom Barbers")
+
                         });
             };
             $scope.resetNewClientForm = function () {

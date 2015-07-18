@@ -32,6 +32,12 @@ angular.module('myApp.clients', ['ngRoute'])
                     $scope.client.counters.visits = Number($scope.client.counters.visits);
                     $scope.client.counters.progress = Number($scope.client.counters.progress);
                     $scope.client.counters.freeVisits = Number($scope.client.counters.freeVisits);
+
+
+                    // display QR code
+                    if ($scope.client.qrcode) {
+                        $scope.qrClient = $scope.client.qrcode.toString();
+                    }
                     $http.get('/api/visits/' + $scope.client.id)
                             .success(function (response) {
                                 $scope.VisitsArray = response;
@@ -45,8 +51,6 @@ angular.module('myApp.clients', ['ngRoute'])
             }, function () {
                 alert("Client not found");
             });
-            // TODO -> find why I used qr client
-//                    $scope.qrClient = $scope.client.qrcode.toString();
             $scope.updateClient = function () {
                 $http.post('/api/clients/' + $scope.client.id, $scope.client)
                         .success(function (r) {
@@ -75,41 +79,19 @@ angular.module('myApp.clients', ['ngRoute'])
                 $location.path("/clients/" + id);
             };
             $scope.addHairCut = function (id) {
-                var clientIndex = $scope.findClientIndex(id);
-                $scope.verifyCountersNum(clientIndex);
-                if (Array.isArray($scope.people) && typeof ($scope.people[clientIndex]) !== 'undefined'
-                        && typeof ($scope.people[clientIndex].counters) !== 'undefined') {
-                    $scope.people[clientIndex].counters.progress += 1;
-                    $scope.people[clientIndex].counters.visits += 1;
-                    $scope.people[clientIndex].last_visit = new Date();
-                    if ($scope.people[clientIndex].counters.progress === DEFAULT_SETTINGS.numberVisits) {
-                        $scope.people[clientIndex].counters.freeVisits += 1;
-
-                        // Invoking immediatelly for now. ToDo: implement invoke on button click;
-                        $scope.redeemCoupon(id);
-                    }
-
-                    /*
-                     * ADD VISIT
-                     * default goes as default price
-                     */
-                    var visit = {};
-                    visit = {
-                        userId: $scope.people[clientIndex].id,
-                        userName: $scope.people[clientIndex].name,
-                        price: DEFAULT_SETTINGS.defaultPrice,
-                        date: new Date()
-                    };
-                    $http.post('/api/visits', visit)
-                            .success(function () {
-                                $http.post('/api/clients', $scope.people[clientIndex]);
-                            });
-                } else {
-                    console.log("Error while adding...");
-                }
+                var clientIndex = clientsService.findClientIndex(id, $scope.people);
+                var visit = {};
+                visit = {
+                    barber: $scope.currentUser.user,
+                    client: $scope.people[clientIndex],
+                    price: DEFAULT_SETTINGS.defaultPrice,
+                    date: new Date(),
+                    new : false
+                };
+                $scope.recordVisit(visit);
             };
             $scope.removeHairCut = function (id) {
-                var clientIndex = $scope.findClientIndex(id);
+                var clientIndex = clientsService.findClientIndex(id, $scope.people);
                 $scope.verifyCountersNum(clientIndex);
                 var response = confirm("Do you want to remove haircut?");
                 if (response) {
@@ -127,38 +109,6 @@ angular.module('myApp.clients', ['ngRoute'])
                     $http.post('/api/clients', $scope.people[clientIndex]);
                 }
             };
-            $scope.redeemCoupon = function (id) {
-                var clientIndex = $scope.findClientIndex(id);
-                if ($scope.people[clientIndex].counters.freeVisits > 0) {
-                    $scope.people[clientIndex].counters.progress = 0;
-                    $scope.people[clientIndex].counters.freeVisits -= 1;
-                    alert(DEFAULT_SETTINGS.winMessage);
-                } else {
-                    alert("You don't have any discount coupons yet");
-                }
-            };
-            $scope.findClientIndex = function (id) {
-                for (var i = 0, numClients = $scope.people.length; i < numClients; i++) {
-                    if ($scope.people[i].id === id || $scope.people[i]._id === id) {
-                        return i;
-                    }
-                }
-            };
-
-            $scope.verifyCountersNum = function (clientIndex) {
-                if (!Number($scope.people[clientIndex].counters.progress) || $scope.people[clientIndex].counters.progress === 'NaN')
-                {
-                    parseInt($scope.people[clientIndex].counters.progress);
-                }
-                if (!Number($scope.people[clientIndex].counters.visits) || $scope.people[clientIndex].counters.visits === 'NaN')
-                {
-                    parseInt($scope.people[clientIndex].counters.visits);
-                }
-                if (!Number($scope.people[clientIndex].counters.freeVisits) || $scope.people[clientIndex].counters.freeVisits === 'NaN')
-                {
-                    parseInt($scope.people[clientIndex].counters.freeVisits);
-                }
-            }
         })
         /*
          * Filter used for pagination.

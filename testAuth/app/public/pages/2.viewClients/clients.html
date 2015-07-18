@@ -24,8 +24,8 @@
                         <td ng-click='openClient(person.id)'>{{person.phone}}</td>
                         <td ng-click='openClient(person.id)'> {{person.counters.progress}} </td>
                         <td ng-click='openClient(person.id)'> {{person.last_visit|date:'dd/MM/yyyy'}}</td>
-                        <td class=" btn btn-primary" ng-click="addHairCut(person._id)"><i class="glyphicon glyphicon-plus"></i> ADD</td>
-                        <td class=" btn btn-danger" ng-click="removeHairCut(person._id)"><i class="glyphicon glyphicon-minus"></i> REMOVE</td>
+                        <td class=" btn btn-primary" ng-click="addHairCut(person.id)"><i class="glyphicon glyphicon-plus"></i> ADD</td>
+                        <td class=" btn btn-danger" ng-click="removeHairCut(person.id)"><i class="glyphicon glyphicon-minus"></i> REMOVE</td>
                     </tr>
                 <tbody>
             </table>

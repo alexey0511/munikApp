@@ -2,10 +2,12 @@ var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 var parseUrlencoded = bodyParser.urlencoded({extended: false});
+bodyParserJson = bodyParser.json();
+
 
 
 router.route('/smsquery')
-        .post(function (req, res) {
+        .post(bodyParserJson,function (req, res) {
             var click = require('clickatell');
             var me = req.body.me;
             var apiId = req.body.apiId;
@@ -18,7 +20,11 @@ router.route('/smsquery')
             });
         });
 router.route('/smssendtxt')
-        .post(function (req, res) {
+        .get(function (req, res) {
+            res.send("POST would be better");
+        })
+        .post(bodyParserJson, function (req, res) {
+
             var click = require('clickatell');
             var me = req.body.me;
             var apiId = req.body.apiId;
@@ -27,9 +33,6 @@ router.route('/smssendtxt')
             var text = req.body.text;
             var sender = click.Clickatell({user: me, api_id: apiId, password: pwd});
             sender.send(phone, text, function (result) {
-                var mId = result.substr(4);
-                sender.query(mId, function (data) {
-                });
                 res.send(result);
             });
         });

@@ -18,7 +18,7 @@ describe('BUY HAIRCUT PAGE', function () {
             scope.currentUser = {
                 user: 'munik'
             }
-            $httpBackend.expectGET('/api/getUsers').respond(200, ['munik', 'herman']);
+            $httpBackend.expectGET('/api/getUserList').respond(200, ['munik', 'herman']);
             $httpBackend.expectGET('/api/getClients').respond(200, [{'first_name': 'client', 'last_name': 'herman'}]);
             $httpBackend.expectGET('/api/getProducts').respond(200, [{'product': {'name': 'haircut', 'price': '35'}}]);
             $httpBackend.flush();

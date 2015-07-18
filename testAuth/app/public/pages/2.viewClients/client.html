@@ -1,6 +1,7 @@
 <div id="clientInfoForm">
     <div>
         <h2 style='text-align: center;'>EDIT CLIENT INFO</h2>
+        <qrcode data="string"></qrcode>
     </div>
     <div class='row' style='border:1px solid bladk'>
         <div class='col-sm-4 '>
@@ -68,7 +69,7 @@
                     <label for="inputProgress" class="col-sm-3 control-label">Progress:</label>
                     <div class="col-sm-6">
                         <rating ng-model="client.counters.progress" max="6"
-                                state-on="'scissors-icon'" readonly="true"></rating>
+                                state-on="'scissors-icon'" state-off="'none'" readonly="true"></rating>
                     </div>
                 </div>
                 <div class="form-group">

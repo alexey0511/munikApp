@@ -8,7 +8,7 @@ angular.module('myApp.sell', ['ngRoute'])
                     controller: 'SellController'
                 });
             }])
-        .controller('SellController', function ($scope, $q, $http, $rootScope, cartService, bonusService) {
+        .controller('SellController', function ($scope, $q, $http, cartService) {
             $scope.init = function () {
                 $scope.cart = {};
                 $scope.getUsers()
@@ -22,12 +22,12 @@ angular.module('myApp.sell', ['ngRoute'])
             };
             $scope.getUsers = function () {
                 var defer = $q.defer();
-                $http.get('/api/getUsers')
+                $http.get('/api/getUserList')
                         .success(function (response) {
                             $scope.users = response;
                             for (var i = 0, l = $scope.users.length; i < l; i++) {
                                 if ($scope.users[i] === $scope.currentUser.user) {
-                                    $scope.cart.user = $scope.users[i];
+                                    $scope.cart.barber = $scope.users[i];
                                 }
                             }
                             defer.resolve();
@@ -52,6 +52,8 @@ angular.module('myApp.sell', ['ngRoute'])
                 $http.get('/api/getProducts')
                         .success(function (response) {
                             $scope.products = response;
+//                            $scope.cartData = response;
+
                             defer.resolve();
                         });
                 return defer.promise;
@@ -80,61 +82,40 @@ angular.module('myApp.sell', ['ngRoute'])
                     // TODO - set focus
                     return;
                 }
+                if (!$scope.cart.barber) {
+                    $scope.cart.barber = $scope.currentUser.user;
+                }
+
                 if (!$scope.cartData || $scope.cartData.length == 0) {
                     alert("Please select type of haircut");
                     return;
                 }
-                console.log("creating haircuts");
                 // record visit (haircuts & clients)
                 $scope.cart.products = $scope.cartData;
                 $scope.cart.date = new Date();
 
                 // temprorary (delete after data switched from haircuts to prize)
-                if (!$scope.cart.client.counters) {
-                    $scope.cart.client.counters = {};
-                }
-                $scope.cart.client = bonusService.addVisit($scope.cart.client);
                 console.log("SAVING...", $scope.cart);
-                $http.post('/api/visits', $scope.cart)
-                        .success(function () {
-                            $http.post('/api/clients', $scope.people[$scope.findClient($scope.cart.client.id)])
-                                    .success(function () {
-                                        alert("saved");
-                                        $scope.cart = {};
-                                        $scope.cartData = [];
-                                        cartService.reset();
-                                    });
-                        });
+                var todayDate = new Date();
+                for (var i = 0, l = $scope.cart.products.length; i < l; i++) {
+                    var visit = {
+                        barber: $scope.cart.barber,
+                        client: $scope.cart.client,
+                        price: $scope.cart.products[i].price,
+                        date: todayDate,
+                        new : false
+                    };
+                    $scope.recordVisit(visit);
+                }
+                alert("saved");
+                $scope.cart = {};
+                $scope.cartData = [];
+                cartService.reset();
             };
             $scope.init();
         })
 
-////// CART MODULE
 
-        .factory("bonusService", function () {
-            var bs = {};
-            return {
-                addVisit: function (client) {
-                    if (!client.counters.progress) {
-                        client.counters.progress = 0;
-                    }
-                    if (!client.counters.freeVisits) {
-                        client.counters.freeVisits = 0;
-                    }
-                    if (!client.counters.visits) {
-                        client.counters.visits = 0;
-                    }
-                    client.counters.progress++;
-                    if (client.counters.progress === 6) {
-                        client.counters.freeVisits++;
-                        client.counters.progress = 0;
-                    }
-                    client.counters.visits++;
-                    client.last_visit = new Date();
-                    return client;
-                }
-            }
-        })
         .factory("cartService", function () {
             var cartData = [];
             return {
